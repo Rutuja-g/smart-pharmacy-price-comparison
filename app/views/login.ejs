@@ -1,0 +1,47 @@
+<%- include('partials/header', { title: title, appName: appName }) %>
+
+<section class="auth-page">
+  <div class="auth-card">
+    <div class="auth-heading">
+      <span class="auth-icon" aria-hidden="true">&#128274;</span>
+      <h1>Welcome back</h1>
+      <p class="auth-sub">Log in to access your account and compare prices.</p>
+    </div>
+
+<%- include('partials/flash') %>
+
+    <form action="/login" method="POST" class="auth-form" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          type="email" id="email" name="email" required
+          autocomplete="email"
+          value="<%= values.email || '' %>"
+          class="<%= errors.email ? 'input-error' : '' %>"
+          placeholder="you@example.com"
+        />
+        <% if (errors.email) { %><small class="field-error"><%= errors.email %></small><% } %>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          type="password" id="password" name="password" required
+          autocomplete="current-password"
+          class="<%= errors.password ? 'input-error' : '' %>"
+          placeholder="Your password"
+        />
+        <% if (errors.password) { %><small class="field-error"><%= errors.password %></small><% } %>
+      </div>
+
+      <button type="submit" class="btn btn-block">Login</button>
+    </form>
+
+    <p class="auth-alt">
+      Don't have an account? <a href="/register">Register</a>
+    </p>
+  </div>
+</section>
+
+<%- include('partials/footer', { year: new Date().getFullYear(), appName: appName }) %>

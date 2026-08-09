@@ -1,0 +1,27 @@
+<%- include('../partials/header', { title: title, appName: appName }) %>
+
+<section class="auth-page">
+  <div class="auth-card">
+    <div class="auth-heading">
+      <span class="auth-icon" aria-hidden="true">&#9998;</span>
+      <h1>Edit Medicine</h1>
+      <p class="auth-sub">Update the details for <strong><%= medicine.name || 'this medicine' %></strong>.</p>
+    </div>
+
+    <%- include('../partials/flash') %>
+
+    <%- include('_form', {
+      values: values,
+      errors: errors,
+      categories: categories,
+      formAction: '/admin/medicines/' + medicine.id + '/edit',
+      submitLabel: 'Save Changes'
+    }) %>
+
+    <p class="auth-alt">
+      <a href="/admin/medicines">&larr; Back to Manage Medicines</a>
+    </p>
+  </div>
+</section>
+
+<%- include('../partials/footer', { year: new Date().getFullYear(), appName: appName }) %>

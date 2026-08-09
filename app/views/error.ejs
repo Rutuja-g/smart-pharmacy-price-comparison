@@ -1,0 +1,11 @@
+<%- include('partials/header', { title: title, appName: 'Smart Pharmacy Price Comparison' }) %>
+
+<section class="error">
+  <span class="error-icon" aria-hidden="true">&#10071;</span>
+  <div class="error-code"><%= statusCode %></div>
+  <h1><%= title %></h1>
+  <p><%= message %></p>
+  <a href="/" class="btn btn-primary">Back to Home</a>
+</section>
+
+<%- include('partials/footer', { year: new Date().getFullYear(), appName: 'Smart Pharmacy Price Comparison' }) %>

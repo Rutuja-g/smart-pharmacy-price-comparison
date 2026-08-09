@@ -1,0 +1,58 @@
+<%- include('../partials/header', { title: title, appName: appName }) %>
+
+<section class="page">
+  <div class="page-heading">
+    <h1>Browse Medicines</h1>
+    <p class="page-subtitle">Explore the active medicines in our catalog.</p>
+  </div>
+
+  <%- include('../partials/flash') %>
+
+  <% if (typeof medicines !== 'undefined' && medicines && medicines.length > 0) { %>
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Generic Name</th>
+            <th scope="col">Category</th>
+            <th scope="col">Form</th>
+            <th scope="col">Strength</th>
+            <th scope="col">Rx</th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% medicines.forEach(function (m) { %>
+            <tr>
+              <td><%= m.name %></td>
+              <td><%= m.generic_name || '—' %></td>
+              <td><%= m.category_name || '—' %></td>
+              <td><%= m.dosage_form || '—' %></td>
+              <td><%= m.strength || '—' %></td>
+              <td>
+                <% if (m.prescription_required) { %>
+                  <span class="badge badge-warning">Rx</span>
+                <% } else { %>
+                  <span class="badge badge-success">OTC</span>
+                <% } %>
+              </td>
+              <td class="table-actions">
+                <a href="/medicines/<%= m.id %>" class="btn btn-sm btn-outline">View</a>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+<% } else { %>
+    <div class="empty-state">
+      <span class="state-icon" aria-hidden="true">&#128712;</span>
+      <h3>No medicines available</h3>
+      <p>No medicines are available right now.</p>
+      <p class="hint">Please check back later.</p>
+    </div>
+  <% } %>
+</section>
+
+<%- include('../partials/footer', { year: new Date().getFullYear(), appName: appName }) %>

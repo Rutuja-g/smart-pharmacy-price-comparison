@@ -1,0 +1,60 @@
+<%- include('partials/header', { title: title, appName: appName }) %>
+
+<section class="profile-page">
+  <div class="profile-card">
+    <div class="profile-heading">
+      <div class="avatar" aria-hidden="true">
+        <%= (user.name || '?').charAt(0).toUpperCase() %>
+      </div>
+      <div>
+        <h1><%= user.name %></h1>
+        <span class="role-badge role-<%= user.role %>"><%= user.role.replace('_', ' ') %></span>
+      </div>
+    </div>
+
+    <%- include('partials/flash') %>
+
+    <div class="profile-details">
+      <div class="profile-row">
+        <span class="profile-label">Name</span>
+        <span class="profile-value"><%= user.name %></span>
+      </div>
+      <div class="profile-row">
+        <span class="profile-label">Email</span>
+        <span class="profile-value"><%= user.email %></span>
+      </div>
+      <div class="profile-row">
+        <span class="profile-label">Role</span>
+        <span class="profile-value"><%= user.role.replace('_', ' ') %></span>
+      </div>
+      <% if (user.phone) { %>
+      <div class="profile-row">
+        <span class="profile-label">Phone</span>
+        <span class="profile-value"><%= user.phone %></span>
+      </div>
+      <% } %>
+      <% if (user.address) { %>
+      <div class="profile-row">
+        <span class="profile-label">Address</span>
+        <span class="profile-value"><%= user.address %></span>
+      </div>
+      <% } %>
+      <% if (user.created_at) { %>
+      <div class="profile-row">
+        <span class="profile-label">Member since</span>
+        <span class="profile-value"><%= new Date(user.created_at).toLocaleDateString() %></span>
+      </div>
+      <% } %>
+    </div>
+
+    <div class="profile-actions">
+      <a href="/" class="btn btn-secondary">Back to Home</a>
+<form action="/logout" method="POST" class="inline-form">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <button type="submit" class="btn btn-danger">Logout</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer', { year: new Date().getFullYear(), appName: appName }) %>

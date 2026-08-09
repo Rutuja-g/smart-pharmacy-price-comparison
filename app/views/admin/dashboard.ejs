@@ -1,0 +1,89 @@
+<%- include('../partials/header', { title: title, appName: appName }) %>
+
+<section class="page">
+  <div class="page-heading">
+    <h1>Admin Dashboard</h1>
+    <p class="page-subtitle">Platform overview and management shortcuts.</p>
+  </div>
+
+  <%- include('../partials/flash') %>
+
+  <!-- Summary stat cards -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <span class="stat-value"><%= metrics.totalUsers %></span>
+      <span class="stat-label">Total Users</span>
+    </div>
+    <div class="stat-card stat-card-success">
+      <span class="stat-value"><%= metrics.activeUsers %></span>
+      <span class="stat-label">Active Users</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value"><%= metrics.totalPharmacies %></span>
+      <span class="stat-label">Total Pharmacies</span>
+    </div>
+    <div class="stat-card stat-card-success">
+      <span class="stat-value"><%= metrics.activePharmacies %></span>
+      <span class="stat-label">Active Pharmacies</span>
+    </div>
+    <div class="stat-card stat-card-warning">
+      <span class="stat-value"><%= metrics.pendingPharmacies %></span>
+      <span class="stat-label">Pending Pharmacies</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value"><%= metrics.totalMedicines %></span>
+      <span class="stat-label">Total Medicines</span>
+    </div>
+    <div class="stat-card stat-card-success">
+      <span class="stat-value"><%= metrics.activeMedicines %></span>
+      <span class="stat-label">Active Medicines</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value"><%= metrics.totalInventory %></span>
+      <span class="stat-label">Total Inventory Records</span>
+    </div>
+    <div class="stat-card stat-card-success">
+      <span class="stat-value"><%= metrics.availableInventory %></span>
+      <span class="stat-label">Available</span>
+    </div>
+    <div class="stat-card stat-card-danger">
+      <span class="stat-value"><%= metrics.outOfStockInventory %></span>
+      <span class="stat-label">Out of Stock</span>
+    </div>
+  </div>
+
+  <!-- Management navigation cards -->
+  <h2 class="section-title" style="margin-top: var(--space-4);">Management</h2>
+  <div class="feature-grid">
+    <a href="/admin/users" class="category-card">
+      <div class="category-card-head">
+        <h3>Users</h3>
+        <span aria-hidden="true">&#128101;</span>
+      </div>
+      <p class="category-desc">View, activate, and deactivate user accounts.</p>
+    </a>
+    <a href="/admin/pharmacies" class="category-card">
+      <div class="category-card-head">
+        <h3>Pharmacies</h3>
+        <span aria-hidden="true">&#128205;</span>
+      </div>
+      <p class="category-desc">Add, edit, activate/deactivate, and assign owners.</p>
+    </a>
+    <a href="/admin/medicines" class="category-card">
+      <div class="category-card-head">
+        <h3>Medicines</h3>
+        <span aria-hidden="true">&#128137;</span>
+      </div>
+      <p class="category-desc">Add, edit, and activate/deactivate medicines.</p>
+    </a>
+    <a href="/admin/categories" class="category-card">
+      <div class="category-card-head">
+        <h3>Categories</h3>
+        <span aria-hidden="true">&#128193;</span>
+      </div>
+      <p class="category-desc">Manage medicine categories.</p>
+    </a>
+  </div>
+</section>
+
+<%- include('../partials/footer', { year: new Date().getFullYear(), appName: appName }) %>

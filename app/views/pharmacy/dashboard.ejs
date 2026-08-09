@@ -1,0 +1,139 @@
+<%- include('../partials/header', { title: title, appName: appName }) %>
+
+<section class="page">
+  <div class="page-heading page-heading-row">
+    <div>
+      <h1>Pharmacy Dashboard</h1>
+      <p class="page-subtitle">Manage your pharmacies and their inventory.</p>
+    </div>
+    <% if (selectedPharmacy) { %>
+      <div class="page-actions">
+        <a href="/pharmacy/inventory?pharmacyId=<%= selectedPharmacy.id %>" class="btn btn-sm">View Inventory</a>
+        <a href="/pharmacy/inventory/add?pharmacyId=<%= selectedPharmacy.id %>" class="btn btn-sm btn-secondary">+ Add Inventory</a>
+      </div>
+    <% } %>
+  </div>
+
+  <%- include('../partials/flash') %>
+
+<% if (pharmacies && pharmacies.length === 0) { %>
+    <div class="empty-state">
+      <span class="state-icon" aria-hidden="true">&#128205;</span>
+      <h3>No pharmacy linked yet</h3>
+      <p>You do not own any pharmacy yet.</p>
+      <p class="hint">Contact the platform administrator to link a pharmacy to your account.</p>
+    </div>
+  <% } else { %>
+
+    <!-- Pharmacy selector -->
+    <form action="/pharmacy/dashboard" method="GET" class="pharmacy-selector">
+      <label for="pharmacyId">Manage pharmacy:</label>
+      <select name="pharmacyId" id="pharmacyId" onchange="this.form.submit()">
+        <% pharmacies.forEach(function (p) {
+             const selected = selectedPharmacy && p.id === selectedPharmacy.id ? 'selected' : '';
+        %>
+          <option value="<%= p.id %>" <%= selected %>><%= p.name %> <%= p.status === 'active' ? '' : '(inactive)' %></option>
+        <% }) %>
+      </select>
+      <noscript><button type="submit" class="btn btn-sm">Switch</button></noscript>
+    </form>
+
+    <% if (selectedPharmacy) { %>
+      <!-- Pharmacy info card -->
+      <div class="admin-card" style="margin-bottom: var(--space-3);">
+        <h2><%= selectedPharmacy.name %></h2>
+        <div class="detail-grid">
+          <div>
+            <span class="profile-label">Address</span>
+            <span class="profile-value"><%= selectedPharmacy.address || '—' %></span>
+          </div>
+          <div>
+            <span class="profile-label">City</span>
+            <span class="profile-value"><%= selectedPharmacy.city || '—' %></span>
+          </div>
+          <div>
+            <span class="profile-label">State</span>
+            <span class="profile-value"><%= selectedPharmacy.state || '—' %></span>
+          </div>
+          <div>
+            <span class="profile-label">Phone</span>
+            <span class="profile-value"><%= selectedPharmacy.phone || '—' %></span>
+          </div>
+          <div>
+            <span class="profile-label">Status</span>
+            <span class="profile-value">
+              <% if (selectedPharmacy.status === 'active') { %>
+                <span class="badge badge-success">Active</span>
+              <% } else { %>
+                <span class="badge badge-warning"><%= selectedPharmacy.status %></span>
+              <% } %>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary stat cards -->
+      <% if (summary) { %>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <span class="stat-value"><%= summary.total_medicines %></span>
+            <span class="stat-label">Total Medicines</span>
+          </div>
+          <div class="stat-card stat-card-success">
+            <span class="stat-value"><%= summary.available %></span>
+            <span class="stat-label">Available</span>
+          </div>
+          <div class="stat-card stat-card-danger">
+            <span class="stat-value"><%= summary.out_of_stock %></span>
+            <span class="stat-label">Out of Stock</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value"><%= summary.recently_updated.length %></span>
+            <span class="stat-label">Recently Updated</span>
+          </div>
+        </div>
+
+        <!-- Recently updated inventory -->
+        <div class="admin-card" style="margin-top: var(--space-3);">
+          <h2>Recently Updated Inventory</h2>
+          <% if (summary.recently_updated.length > 0) { %>
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th scope="col">Medicine</th>
+                    <th scope="col">Stock</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Availability</th>
+                    <th scope="col">Updated</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% summary.recently_updated.forEach(function (item) { %>
+                    <tr>
+                      <td><%= item.medicine_name %></td>
+                      <td><%= item.stock_quantity %></td>
+<td>₹<%= item.selling_price !== null ? item.selling_price.toFixed(2) : '—' %></td>
+                      <td>
+                        <% if (item.availability) { %>
+                          <span class="badge badge-success">Available</span>
+                        <% } else { %>
+                          <span class="badge badge-danger">Out of Stock</span>
+                        <% } %>
+                      </td>
+                      <td class="table-sub"><%= new Date(item.last_updated).toLocaleString() %></td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          <% } else { %>
+            <p class="hint">No inventory records yet. Add some to get started.</p>
+          <% } %>
+        </div>
+      <% } %>
+    <% } %>
+  <% } %>
+</section>
+
+<%- include('../partials/footer', { year: new Date().getFullYear(), appName: appName }) %>

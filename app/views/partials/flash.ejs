@@ -1,0 +1,26 @@
+<% if (typeof flash !== 'undefined' && flash) { %>
+  <% if (flash.success) { %>
+    <div class="alert alert-success" role="status">
+      <span class="alert-icon" aria-hidden="true">&#10003;</span>
+      <span><%= flash.success %></span>
+    </div>
+  <% } %>
+  <% if (flash.info) { %>
+    <div class="alert alert-info" role="status">
+      <span class="alert-icon" aria-hidden="true">&#8505;</span>
+      <span><%= flash.info %></span>
+    </div>
+  <% } %>
+  <% if (flash.error) { %>
+    <div class="alert alert-error" role="alert">
+      <span class="alert-icon" aria-hidden="true">&#33;</span>
+      <span><%= flash.error %></span>
+    </div>
+  <% } %>
+<% } %>
+<% if (typeof errors !== 'undefined' && errors && errors.general) { %>
+  <div class="alert alert-error" role="alert">
+    <span class="alert-icon" aria-hidden="true">&#33;</span>
+    <span><%= errors.general %></span>
+  </div>
+<% } %>

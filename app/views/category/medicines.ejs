@@ -1,0 +1,63 @@
+<%- include('../partials/header', { title: title, appName: appName }) %>
+
+<section class="page">
+  <div class="page-heading">
+    <a href="/categories" class="back-link">&larr; Back to categories</a>
+    <h1><%= category.name %></h1>
+    <p class="page-subtitle">
+      <%= category.description || 'Medicines in this category.' %>
+    </p>
+  </div>
+
+  <%- include('../partials/flash') %>
+
+  <% if (typeof medicines !== 'undefined' && medicines && medicines.length > 0) { %>
+    <div class="result-list">
+      <% medicines.forEach(function (m) { %>
+        <a class="result-card" href="/medicines/<%= m.id %>">
+          <div class="result-card-main">
+            <h3 class="result-title"><%= m.name %></h3>
+            <p class="result-subtitle">
+              <% if (m.generic_name) { %>
+                Generic: <span class="result-emphasis"><%= m.generic_name %></span>
+              <% } else { %>
+                Generic: <span class="muted">&mdash;</span>
+              <% } %>
+            </p>
+          </div>
+          <ul class="result-meta">
+            <li>
+              <span class="detail-label">Form</span>
+              <span><%= m.dosage_form || '—' %></span>
+            </li>
+            <li>
+              <span class="detail-label">Strength</span>
+              <span><%= m.strength || '—' %></span>
+            </li>
+            <li>
+              <span class="detail-label">Type</span>
+              <span>
+                <% if (m.prescription_required) { %>
+                  <span class="badge badge-warning">Rx</span>
+                <% } else { %>
+                  <span class="badge badge-success">OTC</span>
+                <% } %>
+              </span>
+            </li>
+          </ul>
+        </a>
+      <% }) %>
+    </div>
+<% } else { %>
+    <div class="empty-state">
+      <span class="state-icon" aria-hidden="true">&#128137;</span>
+      <h3>No medicines in this category</h3>
+      <p>No active medicines are available in this category right now.</p>
+      <div class="empty-actions">
+        <a href="/categories" class="btn btn-outline btn-sm">Browse other categories</a>
+      </div>
+    </div>
+  <% } %>
+</section>
+
+<%- include('../partials/footer', { year: new Date().getFullYear(), appName: appName }) %>

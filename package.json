@@ -1,0 +1,31 @@
+{
+  "name": "smart-pharmacy-price-comparison",
+  "version": "1.0.0",
+  "description": "A full-stack web application to search medicines, compare prices across pharmacies, and find generic alternatives.",
+  "main": "app/server.js",
+  "scripts": {
+    "start": "node app/server.js",
+    "dev": "nodemon app/server.js"
+  },
+  "keywords": [
+    "pharmacy",
+    "medicine",
+    "price-comparison",
+    "express",
+    "ejs",
+    "mysql"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "mysql2": "^3.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}

@@ -1,0 +1,80 @@
+<%- include('partials/header', { title: title, appName: appName }) %>
+
+<section class="auth-page">
+  <div class="auth-card">
+    <div class="auth-heading">
+      <span class="auth-icon" aria-hidden="true">&#9998;</span>
+      <h1>Create your account</h1>
+      <p class="auth-sub">Join to compare medicine prices and start saving.</p>
+    </div>
+
+<%- include('partials/flash') %>
+
+    <form action="/register" method="POST" class="auth-form" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <div class="form-group">
+        <label for="name">Full Name</label>
+        <input
+          type="text" id="name" name="name" required
+          autocomplete="name"
+          value="<%= values.name || '' %>"
+          class="<%= errors.name ? 'input-error' : '' %>"
+          placeholder="e.g. Jane Doe"
+        />
+        <% if (errors.name) { %><small class="field-error"><%= errors.name %></small><% } %>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          type="email" id="email" name="email" required
+          autocomplete="email"
+          value="<%= values.email || '' %>"
+          class="<%= errors.email ? 'input-error' : '' %>"
+          placeholder="you@example.com"
+        />
+        <% if (errors.email) { %><small class="field-error"><%= errors.email %></small><% } %>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          type="password" id="password" name="password" required
+          autocomplete="new-password"
+          class="<%= errors.password ? 'input-error' : '' %>"
+          placeholder="At least 8 characters"
+        />
+        <% if (errors.password) { %><small class="field-error"><%= errors.password %></small><% } %>
+      </div>
+
+      <div class="form-group">
+        <label for="passwordConfirm">Confirm Password</label>
+        <input
+          type="password" id="passwordConfirm" name="passwordConfirm" required
+          autocomplete="new-password"
+          class="<%= errors.passwordConfirm ? 'input-error' : '' %>"
+          placeholder="Re-enter your password"
+        />
+        <% if (errors.passwordConfirm) { %><small class="field-error"><%= errors.passwordConfirm %></small><% } %>
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Phone (optional)</label>
+        <input type="text" id="phone" name="phone" value="<%= values.phone || '' %>" placeholder="+1-555-0100" />
+      </div>
+
+      <div class="form-group">
+        <label for="address">Address (optional)</label>
+        <input type="text" id="address" name="address" value="<%= values.address || '' %>" placeholder="Street, City" />
+      </div>
+
+      <button type="submit" class="btn btn-block">Create Account</button>
+    </form>
+
+    <p class="auth-alt">
+      Already have an account? <a href="/login">Login</a>
+    </p>
+  </div>
+</section>
+
+<%- include('partials/footer', { year: new Date().getFullYear(), appName: appName }) %>

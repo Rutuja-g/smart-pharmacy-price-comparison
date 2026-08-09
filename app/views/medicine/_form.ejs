@@ -1,0 +1,95 @@
+<%#
+  Shared medicine form fields.
+  Expects: values (object), errors (object), categories (array), formAction (string), submitLabel (string)
+%>
+<form action="<%= formAction %>" method="POST" class="auth-form" novalidate>
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+  <div class="form-group">
+    <label for="name">Brand Name *</label>
+    <input
+      type="text" id="name" name="name" required
+      value="<%= values.name || '' %>"
+      class="<%= errors.name ? 'input-error' : '' %>"
+      placeholder="e.g. Advil"
+    />
+    <% if (errors.name) { %><small class="field-error"><%= errors.name %></small><% } %>
+  </div>
+
+  <div class="form-group">
+    <label for="generic_name">Generic Name</label>
+    <input
+      type="text" id="generic_name" name="generic_name"
+      value="<%= values.generic_name || '' %>"
+      class="<%= errors.generic_name ? 'input-error' : '' %>"
+      placeholder="e.g. Ibuprofen"
+    />
+    <% if (errors.generic_name) { %><small class="field-error"><%= errors.generic_name %></small><% } %>
+  </div>
+
+  <div class="form-group">
+    <label for="category_id">Category *</label>
+    <select
+      id="category_id" name="category_id" required
+      class="<%= errors.category_id ? 'input-error' : '' %>"
+    >
+      <option value="">-- Select a category --</option>
+      <% categories.forEach(function (cat) { %>
+        <option
+          value="<%= cat.id %>"
+          <%= String(values.category_id) === String(cat.id) ? 'selected' : '' %>
+        ><%= cat.name %></option>
+      <% }) %>
+    </select>
+    <% if (errors.category_id) { %><small class="field-error"><%= errors.category_id %></small><% } %>
+  </div>
+
+  <div class="form-group">
+    <label for="dosage_form">Dosage Form</label>
+    <input
+      type="text" id="dosage_form" name="dosage_form"
+      value="<%= values.dosage_form || '' %>"
+      class="<%= errors.dosage_form ? 'input-error' : '' %>"
+      placeholder="e.g. Tablet, Capsule, Syrup"
+    />
+    <% if (errors.dosage_form) { %><small class="field-error"><%= errors.dosage_form %></small><% } %>
+  </div>
+
+  <div class="form-group">
+    <label for="strength">Strength / Dosage</label>
+    <input
+      type="text" id="strength" name="strength"
+      value="<%= values.strength || '' %>"
+      class="<%= errors.strength ? 'input-error' : '' %>"
+      placeholder="e.g. 200mg"
+    />
+    <% if (errors.strength) { %><small class="field-error"><%= errors.strength %></small><% } %>
+  </div>
+
+  <div class="form-group">
+    <label for="description">Description</label>
+    <textarea
+      id="description" name="description" rows="4"
+      class="<%= errors.description ? 'input-error' : '' %>"
+      placeholder="Short description of the medicine"
+    ><%= values.description || '' %></textarea>
+    <% if (errors.description) { %><small class="field-error"><%= errors.description %></small><% } %>
+  </div>
+
+  <div class="form-check">
+    <input
+      type="checkbox" id="prescription_required" name="prescription_required"
+      <%= values.prescription_required ? 'checked' : '' %>
+    />
+    <label for="prescription_required">Prescription required (Rx)</label>
+  </div>
+
+  <div class="form-group">
+    <label for="status">Status</label>
+    <select id="status" name="status">
+      <option value="active" <%= values.status === 'active' ? 'selected' : '' %>>Active</option>
+      <option value="inactive" <%= values.status === 'inactive' ? 'selected' : '' %>>Inactive</option>
+    </select>
+  </div>
+
+  <button type="submit" class="btn btn-block"><%= submitLabel %></button>
+</form>

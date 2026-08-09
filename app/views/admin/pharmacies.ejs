@@ -1,0 +1,95 @@
+<%- include('../partials/header', { title: title, appName: appName }) %>
+
+<section class="page">
+  <div class="page-heading page-heading-row">
+    <div>
+      <h1>Manage Pharmacies</h1>
+      <p class="page-subtitle">Add, edit, activate/deactivate, and assign owners.</p>
+    </div>
+    <div class="page-actions">
+      <a href="/admin/dashboard" class="btn btn-sm btn-secondary">Dashboard</a>
+      <a href="/admin/pharmacies/add" class="btn btn-sm">+ Add Pharmacy</a>
+    </div>
+  </div>
+
+  <%- include('../partials/flash') %>
+
+  <% if (typeof pharmacies !== 'undefined' && pharmacies && pharmacies.length > 0) { %>
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">City / State</th>
+            <th scope="col">Owner</th>
+            <th scope="col">Status</th>
+            <th scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% pharmacies.forEach(function (p) { %>
+            <tr>
+              <td>
+                <%= p.name %>
+                <small class="table-sub"><%= p.phone || '—' %></small>
+              </td>
+              <td><%= (p.city || '—') + ', ' + (p.state || '—') %></td>
+              <td>
+                <% if (p.owner_user_id) { %>
+                  <%= p.owner_name %>
+                  <% if (p.owner_status === 'inactive') { %>
+                    <span class="badge badge-danger">owner inactive</span>
+                  <% } else { %>
+                    <span class="badge badge-success">owner active</span>
+                  <% } %>
+                <% } else { %>
+                  <span class="hint">No owner assigned</span>
+                <% } %>
+              </td>
+              <td>
+                <% if (p.status === 'active') { %>
+                  <span class="badge badge-success">Active</span>
+                <% } else if (p.status === 'pending') { %>
+                  <span class="badge badge-warning">Pending</span>
+                <% } else { %>
+                  <span class="badge badge-danger">Inactive</span>
+                <% } %>
+              </td>
+              <td class="table-actions">
+                <a href="/admin/pharmacies/<%= p.id %>/edit" class="btn btn-sm btn-secondary">Edit</a>
+                <% if (p.status === 'active') { %>
+<form action="/admin/pharmacies/<%= p.id %>/inactive" method="POST" class="inline-form">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                    <button type="submit" class="btn btn-sm btn-danger">Deactivate</button>
+                  </form>
+                <% } else { %>
+<form action="/admin/pharmacies/<%= p.id %>/active" method="POST" class="inline-form">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                    <button type="submit" class="btn btn-sm btn-success">Activate</button>
+                  </form>
+                <% } %>
+                <% if (p.status !== 'pending') { %>
+<form action="/admin/pharmacies/<%= p.id %>/pending" method="POST" class="inline-form">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                    <button type="submit" class="btn btn-sm btn-secondary">Set Pending</button>
+                  </form>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+<% } else { %>
+    <div class="empty-state">
+      <span class="state-icon" aria-hidden="true">&#128205;</span>
+      <h3>No pharmacies yet</h3>
+      <p>No pharmacies have been added yet.</p>
+      <div class="empty-actions">
+        <a href="/admin/pharmacies/add" class="btn btn-sm">+ Add Pharmacy</a>
+      </div>
+    </div>
+  <% } %>
+</section>
+
+<%- include('../partials/footer', { year: new Date().getFullYear(), appName: appName }) %>

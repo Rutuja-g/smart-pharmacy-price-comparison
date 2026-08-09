@@ -1,0 +1,96 @@
+<%- include('../partials/header', { title: title, appName: appName }) %>
+
+<section class="page">
+  <div class="page-heading">
+    <h1>Add Inventory</h1>
+    <p class="page-subtitle">
+      <% if (selectedPharmacy) { %>
+        Add a medicine to <%= selectedPharmacy.name %>'s inventory.
+      <% } else { %>
+        Add a medicine to your pharmacy's inventory.
+      <% } %>
+    </p>
+  </div>
+
+  <%- include('../partials/flash') %>
+
+  <!-- Pharmacy selector -->
+  <form action="/pharmacy/inventory/add" method="GET" class="pharmacy-selector">
+    <label for="pharmacyId">Pharmacy:</label>
+    <select name="pharmacyId" id="pharmacyId" onchange="this.form.submit()">
+      <% pharmacies.forEach(function (p) {
+           const selected = selectedPharmacy && p.id === selectedPharmacy.id ? 'selected' : '';
+      %>
+        <option value="<%= p.id %>" <%= selected %>><%= p.name %></option>
+      <% }) %>
+    </select>
+    <button type="submit" class="btn btn-sm">Switch</button>
+  </form>
+
+  <% if (selectedPharmacy) { %>
+    <div class="admin-card">
+<form action="/pharmacy/inventory" method="POST" class="inventory-form">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <input type="hidden" name="pharmacyId" value="<%= selectedPharmacy.id %>" />
+
+        <div class="form-group">
+          <label for="medicineId">Medicine</label>
+          <select name="medicineId" id="medicineId" required>
+            <option value="">-- Select a medicine --</option>
+            <% medicines.forEach(function (m) {
+                 const sel = values && values.medicineId === m.id ? 'selected' : '';
+            %>
+              <option value="<%= m.id %>" <%= sel %>>
+                <%= m.name %> <%= m.strength ? '(' + m.strength + ')' : '' %>
+              </option>
+            <% }) %>
+          </select>
+          <% if (errors && errors.medicineId) { %>
+            <span class="input-error-text"><%= errors.medicineId %></span>
+          <% } %>
+        </div>
+
+        <div class="form-group">
+          <label for="stock">Stock Quantity</label>
+          <input
+            type="number"
+            id="stock"
+            name="stock"
+            min="0"
+            step="1"
+            value="<%= values && values.stock !== null && values.stock !== undefined ? values.stock : '' %>"
+            placeholder="e.g. 50"
+            required
+          />
+          <% if (errors && errors.stock) { %>
+            <span class="input-error-text"><%= errors.stock %></span>
+          <% } %>
+        </div>
+
+        <div class="form-group">
+<label for="price">Selling Price (₹)</label>
+          <input
+            type="number"
+            id="price"
+            name="price"
+            min="0.01"
+            step="0.01"
+            value="<%= values && values.price ? values.price : '' %>"
+            placeholder="e.g. 9.99"
+            required
+          />
+          <% if (errors && errors.price) { %>
+            <span class="input-error-text"><%= errors.price %></span>
+          <% } %>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Add Inventory</button>
+          <a href="/pharmacy/inventory?pharmacyId=<%= selectedPharmacy.id %>" class="btn btn-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  <% } %>
+</section>
+
+<%- include('../partials/footer', { year: new Date().getFullYear(), appName: appName }) %>

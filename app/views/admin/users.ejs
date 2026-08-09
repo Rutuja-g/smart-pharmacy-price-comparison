@@ -1,0 +1,79 @@
+<%- include('../partials/header', { title: title, appName: appName }) %>
+
+<section class="page">
+  <div class="page-heading page-heading-row">
+    <div>
+      <h1>Manage Users</h1>
+      <p class="page-subtitle">View user roles and activate/deactivate accounts.</p>
+    </div>
+    <div class="page-actions">
+      <a href="/admin/dashboard" class="btn btn-sm btn-secondary">Dashboard</a>
+    </div>
+  </div>
+
+  <%- include('../partials/flash') %>
+
+  <% if (typeof users !== 'undefined' && users && users.length > 0) { %>
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Email</th>
+            <th scope="col">Role</th>
+            <th scope="col">Status</th>
+            <th scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% users.forEach(function (u) { %>
+            <tr>
+              <td>
+                <%= u.name %>
+                <% if (u.id === currentAdminId) { %>
+                  <small class="table-sub">(You)</small>
+                <% } %>
+              </td>
+              <td><%= u.email %></td>
+              <td>
+                <span class="badge role-badge role-<%= u.role %>"><%= u.role %></span>
+              </td>
+              <td>
+                <% if (u.status === 'active') { %>
+                  <span class="badge badge-success">Active</span>
+                <% } else { %>
+                  <span class="badge badge-danger">Inactive</span>
+                <% } %>
+              </td>
+              <td class="table-actions">
+                <% if (u.status === 'active') { %>
+                  <% if (u.id !== currentAdminId) { %>
+<form action="/admin/users/<%= u.id %>/deactivate" method="POST" class="inline-form">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                      <button type="submit" class="btn btn-sm btn-danger">Deactivate</button>
+                    </form>
+                  <% } else { %>
+                    <span class="hint">—</span>
+                  <% } %>
+                <% } else { %>
+<form action="/admin/users/<%= u.id %>/activate" method="POST" class="inline-form">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                    <button type="submit" class="btn btn-sm btn-success">Activate</button>
+                  </form>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+<% } else { %>
+    <div class="empty-state">
+      <span class="state-icon" aria-hidden="true">&#128101;</span>
+      <h3>No users found</h3>
+      <p>There are no user accounts to display.</p>
+    </div>
+  <% } %>
+</section>
+
+<%- include('../partials/footer', { year: new Date().getFullYear(), appName: appName }) %>

@@ -1,0 +1,152 @@
+<%- include('../partials/header', { title: title, appName: appName }) %>
+
+<section class="page">
+  <div class="page-heading page-heading-row">
+    <div>
+      <h1>Pharmacy Inventory</h1>
+      <p class="page-subtitle">
+        <% if (selectedPharmacy) { %>
+          Manage stock and prices for <%= selectedPharmacy.name %>.
+        <% } else { %>
+          Manage your pharmacy inventory.
+        <% } %>
+      </p>
+    </div>
+    <% if (selectedPharmacy) { %>
+      <div class="page-actions">
+        <a href="/pharmacy/dashboard?pharmacyId=<%= selectedPharmacy.id %>" class="btn btn-sm btn-secondary">Dashboard</a>
+        <a href="/pharmacy/inventory/add?pharmacyId=<%= selectedPharmacy.id %>" class="btn btn-sm">+ Add Inventory</a>
+      </div>
+    <% } %>
+  </div>
+
+  <%- include('../partials/flash') %>
+
+<% if (pharmacies && pharmacies.length === 0) { %>
+    <div class="empty-state">
+      <span class="state-icon" aria-hidden="true">&#128205;</span>
+      <h3>No pharmacy linked yet</h3>
+      <p>You do not own any pharmacy yet.</p>
+      <p class="hint">Contact the platform administrator to link a pharmacy to your account.</p>
+    </div>
+  <% } else { %>
+
+    <!-- Pharmacy selector -->
+    <form action="/pharmacy/inventory" method="GET" class="pharmacy-selector">
+      <label for="pharmacyId">Pharmacy:</label>
+      <select name="pharmacyId" id="pharmacyId" onchange="this.form.submit()">
+        <% pharmacies.forEach(function (p) {
+             const selected = selectedPharmacy && p.id === selectedPharmacy.id ? 'selected' : '';
+        %>
+          <option value="<%= p.id %>" <%= selected %>><%= p.name %></option>
+        <% }) %>
+      </select>
+      <button type="submit" class="btn btn-sm">Switch</button>
+    </form>
+
+    <% if (selectedPharmacy) { %>
+      <!-- Search & filter -->
+      <form action="/pharmacy/inventory" method="GET" class="inventory-toolbar">
+        <input type="hidden" name="pharmacyId" value="<%= selectedPharmacy.id %>" />
+        <input
+          type="search"
+          name="q"
+          value="<%= search || '' %>"
+          placeholder="Search medicine, generic name, or strength..."
+          class="toolbar-search"
+        />
+        <select name="filter" class="toolbar-filter">
+          <option value="all" <%= filter === 'all' ? 'selected' : '' %>>All</option>
+          <option value="available" <%= filter === 'available' ? 'selected' : '' %>>Available</option>
+          <option value="out" <%= filter === 'out' ? 'selected' : '' %>>Out of Stock</option>
+        </select>
+        <button type="submit" class="btn btn-sm">Search</button>
+        <% if (search || filter !== 'all') { %>
+          <a href="/pharmacy/inventory?pharmacyId=<%= selectedPharmacy.id %>" class="btn btn-sm btn-secondary">Clear</a>
+        <% } %>
+      </form>
+
+      <% if (inventory && inventory.length > 0) { %>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Medicine</th>
+                <th scope="col">Generic</th>
+                <th scope="col">Category</th>
+                <th scope="col">Stock</th>
+                <th scope="col">Price</th>
+                <th scope="col">Availability</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% inventory.forEach(function (item) { %>
+                <tr>
+                  <td>
+                    <a href="/medicines/<%= item.medicine_id %>"><%= item.medicine_name %></a>
+                    <span class="table-sub"><%= item.strength || '' %></span>
+                  </td>
+                  <td><%= item.generic_name || '—' %></td>
+                  <td><%= item.category_name || '—' %></td>
+                  <td><%= item.stock_quantity %></td>
+<td>₹<%= item.selling_price !== null ? item.selling_price.toFixed(2) : '—' %></td>
+                  <td>
+                    <% if (item.availability) { %>
+                      <span class="badge badge-success">Available</span>
+                    <% } else { %>
+                      <span class="badge badge-danger">Out of Stock</span>
+                    <% } %>
+                  </td>
+                  <td class="inventory-actions">
+                    <!-- Update stock -->
+<form action="/pharmacy/inventory/<%= item.id %>/stock" method="POST" class="inline-form stock-form">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                      <input type="hidden" name="pharmacyId" value="<%= selectedPharmacy.id %>" />
+                      <input type="number" name="stock" min="0" step="1" value="<%= item.stock_quantity %>" class="mini-input" aria-label="Stock quantity" />
+                      <button type="submit" class="btn btn-sm" title="Update stock">Save Stock</button>
+                    </form>
+                    <!-- Update price -->
+<form action="/pharmacy/inventory/<%= item.id %>/price" method="POST" class="inline-form price-form">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                      <input type="hidden" name="pharmacyId" value="<%= selectedPharmacy.id %>" />
+                      <input type="number" name="price" min="0.01" step="0.01" value="<%= item.selling_price !== null ? item.selling_price.toFixed(2) : '' %>" class="mini-input" aria-label="Price" />
+                      <button type="submit" class="btn btn-sm btn-secondary" title="Update price">Save Price</button>
+                    </form>
+                    <!-- Toggle availability -->
+                    <% if (item.availability) { %>
+<form action="/pharmacy/inventory/<%= item.id %>/availability" method="POST" class="inline-form">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                        <input type="hidden" name="pharmacyId" value="<%= selectedPharmacy.id %>" />
+                        <input type="hidden" name="available" value="0" />
+                        <button type="submit" class="btn btn-sm btn-danger">Mark Out</button>
+                      </form>
+                    <% } else { %>
+<form action="/pharmacy/inventory/<%= item.id %>/availability" method="POST" class="inline-form">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                        <input type="hidden" name="pharmacyId" value="<%= selectedPharmacy.id %>" />
+                        <input type="hidden" name="available" value="1" />
+                        <button type="submit" class="btn btn-sm btn-success">Mark Available</button>
+                      </form>
+                    <% } %>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+<% } else { %>
+        <div class="empty-state">
+          <span class="state-icon" aria-hidden="true">&#128712;</span>
+          <h3><%= search || filter !== 'all' ? 'No matching inventory' : 'No inventory yet' %></h3>
+          <p><%= search || filter !== 'all' ? 'No inventory records match your search.' : 'No inventory records yet for this pharmacy.' %></p>
+          <div class="empty-actions">
+            <a href="/pharmacy/inventory/add?pharmacyId=<%= selectedPharmacy.id %>" class="btn btn-sm">+ Add Inventory</a>
+          </div>
+        </div>
+      <% } %>
+    <% } %>
+  <% } %>
+</section>
+
+<%- include('../partials/footer', { year: new Date().getFullYear(), appName: appName }) %>

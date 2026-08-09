@@ -1,0 +1,69 @@
+<%- include('partials/header', { title: title, appName: appName }) %>
+
+<section class="page">
+  <div class="page-heading">
+    <h1>My Wishlist</h1>
+    <p class="page-subtitle">Medicines you've saved for quick access.</p>
+  </div>
+
+  <%- include('partials/flash') %>
+
+  <% if (typeof items !== 'undefined' && items && items.length > 0) { %>
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Medicine</th>
+            <th scope="col">Generic Name</th>
+            <th scope="col">Category</th>
+            <th scope="col">Form</th>
+            <th scope="col">Strength</th>
+            <th scope="col">Saved</th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% items.forEach(function (item) { %>
+            <tr>
+              <td>
+                <a href="/medicines/<%= item.medicine_id %>"><%= item.name %></a>
+              </td>
+              <td><%= item.generic_name || '—' %></td>
+              <td><%= item.category_name || '—' %></td>
+              <td><%= item.dosage_form || '—' %></td>
+              <td><%= item.strength || '—' %></td>
+              <td>
+                <span class="table-sub">
+                  <%= new Date(item.saved_at).toLocaleDateString() %>
+                </span>
+              </td>
+              <td class="table-actions">
+                <a href="/medicines/<%= item.medicine_id %>" class="btn btn-sm btn-outline">View</a>
+<form
+                  action="/wishlist/<%= item.medicine_id %>/remove"
+                  method="POST"
+                  class="inline-form"
+                >
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                  <button type="submit" class="btn btn-sm btn-danger">Remove</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+<% } else { %>
+    <div class="empty-state">
+      <span class="state-icon" aria-hidden="true">&#9825;</span>
+      <h3>Your wishlist is empty</h3>
+      <p>Browse medicines and click "Add to Wishlist" to save items here.</p>
+      <p class="hint">Saved medicines will appear here for quick access.</p>
+      <div class="empty-actions">
+        <a href="/medicines" class="btn btn-primary">Browse Medicines</a>
+      </div>
+    </div>
+  <% } %>
+</section>
+
+<%- include('partials/footer', { year: new Date().getFullYear(), appName: appName }) %>

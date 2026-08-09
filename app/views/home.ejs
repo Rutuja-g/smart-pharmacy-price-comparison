@@ -1,0 +1,111 @@
+<%- include('partials/header', { title: title, appName: appName }) %>
+
+<section class="hero" aria-labelledby="hero-heading">
+  <div class="hero-content">
+    <h1 id="hero-heading">Search medicines. Compare prices. Save more.</h1>
+    <p class="hero-subtitle">
+      Compare medicine prices across pharmacies, check availability, and
+      discover safe generic alternatives &mdash; all in one place.
+    </p>
+
+<form class="search-bar" action="/medicines/search" method="GET" role="search" aria-label="Search medicines">
+      <label class="sr-only" for="medicine-search">Search for a medicine</label>
+      <span class="search-icon" aria-hidden="true">&#9906;</span>
+      <input
+        id="medicine-search"
+        type="search"
+        name="q"
+        placeholder="Search medicines, brands, or generic names..."
+        autocomplete="off"
+      />
+      <button type="submit" class="btn btn-search">Search</button>
+    </form>
+    <p class="search-hint">
+      Try &ldquo;Paracetamol&rdquo;, &ldquo;Ibuprofen&rdquo;, or
+      &ldquo;Vitamin C&rdquo;.
+    </p>
+  </div>
+</section>
+
+<section class="features" aria-labelledby="features-heading">
+  <h2 id="features-heading" class="section-title">Everything you need to save on medicine</h2>
+  <p class="section-subtitle">
+    A smarter way to shop for healthcare, with transparent prices.
+  </p>
+
+  <div class="feature-grid">
+    <article class="feature-card">
+      <span class="feature-icon" aria-hidden="true">&#1696;</span>
+      <h3>Compare Prices</h3>
+      <p>
+        See how pharmacies price the same medicine side by side and pick the
+        best deal near you.
+      </p>
+    </article>
+
+    <article class="feature-card">
+      <span class="feature-icon" aria-hidden="true">&#10004;</span>
+      <h3>Check Availability</h3>
+      <p>
+        Know which pharmacies have your medicine in stock before you visit or
+        order.
+      </p>
+    </article>
+
+    <article class="feature-card">
+      <span class="feature-icon" aria-hidden="true">&#9854;</span>
+      <h3>Generic Alternatives</h3>
+      <p>
+        Discover quality generic options that can cost significantly less than
+        the brand-name version.
+      </p>
+    </article>
+
+    <article class="feature-card">
+      <span class="feature-icon" aria-hidden="true">&#9825;</span>
+      <h3>Save to Wishlist</h3>
+      <p>
+        Keep track of medicines you buy regularly and monitor price changes
+        over time.
+      </p>
+    </article>
+  </div>
+</section>
+
+<section class="how-it-works" aria-labelledby="how-heading" id="compare">
+  <h2 id="how-heading" class="section-title">How it works</h2>
+  <div class="steps">
+    <div class="step">
+      <span class="step-number" aria-hidden="true">1</span>
+      <h3>Search your medicine</h3>
+      <p>Enter a brand or generic name to find matching products.</p>
+    </div>
+    <div class="step">
+      <span class="step-number" aria-hidden="true">2</span>
+      <h3>Compare pharmacy prices</h3>
+      <p>Review prices and availability from multiple pharmacies.</p>
+    </div>
+    <div class="step">
+      <span class="step-number" aria-hidden="true">3</span>
+      <h3>Save money</h3>
+      <p>Choose the best option and discover cheaper generics.</p>
+    </div>
+  </div>
+
+  <div class="cta-box">
+    <h3>Ready to start saving?</h3>
+    <p>
+      Create a free account to save your medicines and get price comparisons.
+    </p>
+    <div class="cta-actions">
+      <% if (typeof currentUser !== 'undefined' && currentUser) { %>
+        <a href="/profile" class="btn btn-primary">Go to My Profile</a>
+      <% } else { %>
+        <a href="/register" class="btn btn-primary">Create Free Account</a>
+        <a href="/login" class="btn btn-outline">Login</a>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer', { year: year, appName: appName }) %>

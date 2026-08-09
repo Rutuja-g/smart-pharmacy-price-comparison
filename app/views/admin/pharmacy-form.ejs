@@ -1,0 +1,114 @@
+<%- include('../partials/header', { title: title, appName: appName }) %>
+
+<section class="auth-page">
+  <div class="auth-card">
+    <div class="auth-heading">
+      <span class="auth-icon" aria-hidden="true">&#128205;</span>
+      <h1><%= mode === 'edit' ? 'Edit Pharmacy' : 'Add Pharmacy' %></h1>
+      <p class="auth-sub">
+        <%= mode === 'edit' ? 'Update pharmacy details and owner.' : 'Create a new pharmacy record.' %>
+      </p>
+    </div>
+
+    <%- include('../partials/flash') %>
+
+<% const formAction = mode === 'edit'
+         ? '/admin/pharmacies/' + (pharmacy ? pharmacy.id : '') + '/edit'
+         : '/admin/pharmacies'; %>
+
+    <form action="<%= formAction %>" method="POST" class="auth-form" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <div class="form-group">
+        <label for="name">Pharmacy Name *</label>
+        <input
+          type="text" id="name" name="name" required
+          value="<%= values.name || '' %>"
+          class="<%= errors.name ? 'input-error' : '' %>"
+          placeholder="e.g. CityCare Pharmacy"
+        />
+        <% if (errors.name) { %><small class="field-error"><%= errors.name %></small><% } %>
+      </div>
+
+      <div class="form-group">
+        <label for="address">Address</label>
+        <input
+          type="text" id="address" name="address"
+          value="<%= values.address || '' %>"
+          class="<%= errors.address ? 'input-error' : '' %>"
+          placeholder="Street address"
+        />
+        <% if (errors.address) { %><small class="field-error"><%= errors.address %></small><% } %>
+      </div>
+
+      <div class="form-group">
+        <label for="city">City</label>
+        <input
+          type="text" id="city" name="city"
+          value="<%= values.city || '' %>"
+          class="<%= errors.city ? 'input-error' : '' %>"
+          placeholder="e.g. Springfield"
+        />
+        <% if (errors.city) { %><small class="field-error"><%= errors.city %></small><% } %>
+      </div>
+
+      <div class="form-group">
+        <label for="state">State</label>
+        <input
+          type="text" id="state" name="state"
+          value="<%= values.state || '' %>"
+          class="<%= errors.state ? 'input-error' : '' %>"
+          placeholder="e.g. IL"
+        />
+        <% if (errors.state) { %><small class="field-error"><%= errors.state %></small><% } %>
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Phone</label>
+        <input
+          type="text" id="phone" name="phone"
+          value="<%= values.phone || '' %>"
+          class="<%= errors.phone ? 'input-error' : '' %>"
+          placeholder="e.g. +1-555-0201"
+        />
+        <% if (errors.phone) { %><small class="field-error"><%= errors.phone %></small><% } %>
+      </div>
+
+      <div class="form-group">
+        <label for="status">Status</label>
+        <select id="status" name="status" class="<%= errors.status ? 'input-error' : '' %>">
+          <% ['active','pending','inactive'].forEach(function (s) {
+               const selected = values.status === s ? 'selected' : '';
+          %>
+            <option value="<%= s %>" <%= selected %>><%= s.charAt(0).toUpperCase() + s.slice(1) %></option>
+          <% }) %>
+        </select>
+        <% if (errors.status) { %><small class="field-error"><%= errors.status %></small><% } %>
+      </div>
+
+      <div class="form-group">
+        <label for="owner_user_id">Pharmacy Owner (Administrator)</label>
+        <select id="owner_user_id" name="owner_user_id" class="<%= errors.owner_user_id ? 'input-error' : '' %>">
+          <option value="">— No owner assigned —</option>
+          <% owners.forEach(function (o) {
+               const selected = String(values.owner_user_id) === String(o.id) ? 'selected' : '';
+               const label = o.name + ' (' + o.email + ')' + (o.status === 'inactive' ? ' — inactive' : '');
+          %>
+            <option value="<%= o.id %>" <%= selected %>><%= label %></option>
+          <% }) %>
+        </select>
+        <small class="hint">Only pharmacy owner accounts are assignable.</small>
+        <% if (errors.owner_user_id) { %><small class="field-error"><%= errors.owner_user_id %></small><% } %>
+      </div>
+
+      <button type="submit" class="btn btn-block">
+        <%= mode === 'edit' ? 'Save Changes' : 'Add Pharmacy' %>
+      </button>
+    </form>
+
+    <p class="auth-alt">
+      <a href="/admin/pharmacies">&larr; Back to Manage Pharmacies</a>
+    </p>
+  </div>
+</section>
+
+<%- include('../partials/footer', { year: new Date().getFullYear(), appName: appName }) %>

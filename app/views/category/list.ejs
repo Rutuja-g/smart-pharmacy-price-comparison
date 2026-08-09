@@ -1,0 +1,87 @@
+<%- include('../partials/header', { title: title, appName: appName }) %>
+
+<section class="page">
+  <div class="page-heading page-heading-row">
+    <div>
+      <h1>Manage Categories</h1>
+      <p class="page-subtitle">Add and edit medicine categories.</p>
+    </div>
+    <div class="page-actions">
+      <a href="/admin/medicines" class="btn btn-sm btn-secondary">Manage Medicines</a>
+    </div>
+  </div>
+
+  <%- include('../partials/flash') %>
+
+  <div class="admin-grid">
+    <div class="admin-card">
+      <h2>Add Category</h2>
+<form action="/admin/categories" method="POST" class="auth-form" novalidate>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <div class="form-group">
+          <label for="name">Category Name *</label>
+          <input
+            type="text" id="name" name="name" required
+            value="<%= values.name || '' %>"
+            class="<%= errors.name ? 'input-error' : '' %>"
+            placeholder="e.g. Analgesics"
+          />
+          <% if (errors.name) { %><small class="field-error"><%= errors.name %></small><% } %>
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea
+            id="description" name="description" rows="3"
+            class="<%= errors.description ? 'input-error' : '' %>"
+            placeholder="Short description of the category"
+          ><%= values.description || '' %></textarea>
+          <% if (errors.description) { %><small class="field-error"><%= errors.description %></small><% } %>
+        </div>
+
+        <button type="submit" class="btn btn-block">Add Category</button>
+      </form>
+    </div>
+
+    <div class="admin-card">
+      <h2>Existing Categories</h2>
+      <% if (typeof categories !== 'undefined' && categories && categories.length > 0) { %>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Active Medicines</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% categories.forEach(function (cat) { %>
+                <tr>
+                  <td>
+                    <%= cat.name %>
+                    <% if (cat.description) { %>
+                      <small class="table-sub"><%= cat.description %></small>
+                    <% } %>
+                  </td>
+                  <td><%= cat.medicine_count %></td>
+                  <td class="table-actions">
+                    <a href="/admin/categories/<%= cat.id %>/edit" class="btn btn-sm btn-secondary">Edit</a>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+<% } else { %>
+        <div class="empty-state">
+          <span class="state-icon" aria-hidden="true">&#128193;</span>
+          <h3>No categories yet</h3>
+          <p>No categories have been added yet.</p>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<%- include('../partials/footer', { year: new Date().getFullYear(), appName: appName }) %>

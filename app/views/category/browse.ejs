@@ -1,0 +1,37 @@
+<%- include('../partials/header', { title: title, appName: appName }) %>
+
+<section class="page">
+  <div class="page-heading">
+    <h1>Browse Categories</h1>
+    <p class="page-subtitle">Explore medicines by their therapeutic category.</p>
+  </div>
+
+  <%- include('../partials/flash') %>
+
+  <% if (typeof categories !== 'undefined' && categories && categories.length > 0) { %>
+    <div class="category-grid">
+      <% categories.forEach(function (cat) { %>
+        <a class="category-card" href="/categories/<%= cat.id %>">
+          <div class="category-card-head">
+            <h3><%= cat.name %></h3>
+            <span class="badge badge-success">
+              <%= cat.medicine_count %> medicine<%= cat.medicine_count === 1 ? '' : 's' %>
+            </span>
+          </div>
+          <p class="category-desc"><%= cat.description || 'Medicines in this category.' %></p>
+        </a>
+      <% }) %>
+    </div>
+<% } else { %>
+    <div class="empty-state">
+      <span class="state-icon" aria-hidden="true">&#128193;</span>
+      <h3>No categories available</h3>
+      <p>No categories are available right now.</p>
+      <div class="empty-actions">
+        <a href="/medicines" class="btn btn-outline btn-sm">Browse all medicines</a>
+      </div>
+    </div>
+  <% } %>
+</section>
+
+<%- include('../partials/footer', { year: new Date().getFullYear(), appName: appName }) %>

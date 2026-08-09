@@ -1,0 +1,367 @@
+<%- include('../partials/header', { title: title, appName: appName }) %>
+
+<section class="page">
+  <div class="page-heading">
+    <a href="/medicines" class="back-link">&larr; Back to medicines</a>
+    <h1><%= medicine.name %></h1>
+    <p class="page-subtitle">Medicine details</p>
+
+    <div class="page-actions wishlist-actions">
+      <% if (typeof currentUser !== 'undefined' && currentUser) { %>
+        <% if (isInWishlist) { %>
+<form
+            action="/wishlist/<%= medicine.id %>/remove"
+            method="POST"
+            class="inline-form"
+          >
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+            <input type="hidden" name="next" value="medicine" />
+            <button type="submit" class="btn btn-sm btn-danger">
+              Remove from Wishlist
+            </button>
+          </form>
+        <% } else { %>
+          <form
+            action="/wishlist/<%= medicine.id %>/add"
+            method="POST"
+            class="inline-form"
+          >
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+            <button type="submit" class="btn btn-sm btn-success">
+              Add to Wishlist
+            </button>
+          </form>
+        <% } %>
+      <% } else { %>
+        <a href="/login" class="btn btn-sm btn-outline">
+          Login to save to wishlist
+        </a>
+      <% } %>
+    </div>
+  </div>
+
+  <%- include('../partials/flash') %>
+
+  <div class="detail-card">
+    <div class="detail-grid">
+      <div class="detail-item">
+        <span class="detail-label">Brand Name</span>
+        <span class="detail-value"><%= medicine.name %></span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">Generic Name</span>
+        <span class="detail-value"><%= medicine.generic_name || '—' %></span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">Category</span>
+        <span class="detail-value"><%= medicine.category_name || '—' %></span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">Dosage Form</span>
+        <span class="detail-value"><%= medicine.dosage_form || '—' %></span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">Strength / Dosage</span>
+        <span class="detail-value"><%= medicine.strength || '—' %></span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">Prescription Required</span>
+        <span class="detail-value">
+          <% if (medicine.prescription_required) { %>
+            <span class="badge badge-warning">Prescription required</span>
+          <% } else { %>
+            <span class="badge badge-success">Over the counter (OTC)</span>
+          <% } %>
+        </span>
+      </div>
+    </div>
+
+    <div class="detail-item detail-description">
+      <span class="detail-label">Description</span>
+      <p class="detail-text"><%= medicine.description || 'No description available.' %></p>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       Availability & Price Comparison
+       ============================================================ -->
+  <div class="compare-section" id="compare">
+    <div class="compare-heading">
+      <h2>Availability &amp; Price Comparison</h2>
+      <p>
+        Compare this medicine's price and availability across pharmacies.
+        The cheapest pharmacy is highlighted where the medicine is in stock.
+      </p>
+    </div>
+
+<% if (!inventory || inventory.length === 0) { %>
+      <div class="empty-state">
+        <span class="state-icon" aria-hidden="true">&#128712;</span>
+        <h3>No price information yet</h3>
+        <p>This medicine is not currently listed for sale at any pharmacy.</p>
+        <p class="hint">No price or availability information is available.</p>
+      </div>
+    <% } else { %>
+
+      <% const availableCount = inventory.filter(i => i.availability === true && i.stock_quantity > 0).length; %>
+      <% const availableItems = inventory.filter(i => i.availability === true && i.stock_quantity > 0); %>
+<% const secondCheapest = availableItems.length > 1
+           ? availableItems.filter(i => i.pharmacy_id !== cheapest.pharmacy_id)
+                 .reduce((min, cur) => !min || Number(cur.selling_price) < Number(min.selling_price) ? cur : min, null)
+           : null; %>
+      <% const savings = cheapest && secondCheapest
+           ? Math.round((Number(secondCheapest.selling_price) - Number(cheapest.selling_price)) * 100) / 100
+           : null; %>
+
+      <% if (availableCount === 0) { %>
+        <div class="out-of-stock-all">
+          <span class="out-icon" aria-hidden="true">&#128680;</span>
+          <h3>Currently unavailable at all pharmacies</h3>
+          <p>
+            <strong><%= medicine.name %></strong> is currently out of stock at
+            every pharmacy. Please check back later.
+          </p>
+        </div>
+      <% } else { %>
+
+        <!-- Summary strip -->
+        <div class="compare-summary">
+          <span class="summary-chip">
+            <span class="status-icon" aria-hidden="true"></span>
+            <span><strong><%= availableCount %></strong> pharmacy<%= availableCount === 1 ? '' : 'ies' %> selling</span>
+          </span>
+          <% if (cheapest) { %>
+            <span class="summary-chip">
+              <span><strong>Lowest price</strong> ₹<%= Number(cheapest.selling_price).toFixed(2) %></span>
+            </span>
+          <% } %>
+        </div>
+
+        <% if (cheapest) { %>
+        <div class="cheapest-banner">
+          <span class="cheapest-icon" aria-hidden="true">&#128176;</span>
+          <div>
+            <strong>Best price:</strong>
+            <span class="cheapest-price">₹<%= Number(cheapest.selling_price).toFixed(2) %></span>
+            <span class="cheapest-where">
+              at <%= cheapest.pharmacy_name %>
+              (<%= cheapest.pharmacy_city || '—' %><%= cheapest.pharmacy_state ? ', ' + cheapest.pharmacy_state : '' %>)
+            </span>
+          </div>
+        </div>
+        <% } %>
+
+        <% if (savings !== null && savings > 0) { %>
+        <div class="savings-callout">
+          <span class="status-icon" aria-hidden="true"></span>
+          <span>
+            Save <strong>₹<%= savings.toFixed(2) %></strong> compared with the next cheapest available pharmacy.
+          </span>
+        </div>
+        <% } %>
+      <% } %>
+
+      <div class="table-responsive">
+        <table class="table compare-table">
+          <thead>
+            <tr>
+              <th>Pharmacy</th>
+              <th>Location</th>
+              <th>Availability</th>
+              <th>Stock</th>
+              <th>Price</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% inventory.forEach(function(item) {
+              const isAvailable = item.availability === true && item.stock_quantity > 0;
+              const isCheapest = cheapest && item.pharmacy_id === cheapest.pharmacy_id;
+            %>
+              <tr class="<%= isCheapest ? 'row-cheapest' : '' %> <%= isAvailable ? '' : 'row-ostock' %>">
+                <td>
+                  <span class="pharmacy-name"><%= item.pharmacy_name %></span>
+                </td>
+                <td>
+                  <span class="table-sub">
+                    <%= item.pharmacy_city || '—' %><%= item.pharmacy_state ? ', ' + item.pharmacy_state : '' %>
+                  </span>
+                </td>
+<td>
+                  <% if (isAvailable) { %>
+                    <span class="status-badge status-available" role="status">
+                      <span class="status-icon" aria-hidden="true"></span>Available
+                    </span>
+                  <% } else { %>
+                    <span class="status-badge status-out" role="status">
+                      <span class="status-icon" aria-hidden="true"></span>Out of Stock
+                    </span>
+                  <% } %>
+                </td>
+                <td>
+                  <% if (isAvailable) { %>
+                    <%= item.stock_quantity %> units
+                  <% } else { %>
+                    <span class="muted">—</span>
+                  <% } %>
+                </td>
+                <td>
+                  <% if (isAvailable) { %>
+                    <span class="price">₹<%= Number(item.selling_price).toFixed(2) %></span>
+                  <% } else { %>
+                    <span class="price muted">—</span>
+                  <% } %>
+                </td>
+                <td>
+                  <% if (isCheapest) { %>
+                    <span class="status-badge status-cheapest" role="status">
+                      <span class="status-icon" aria-hidden="true"></span>Cheapest
+                    </span>
+                  <% } else { %>
+                    <span class="muted">—</span>
+                  <% } %>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+
+      <% if (cheapest) { %>
+        <p class="last-updated hint">
+          Last updated: <%= new Date(cheapest.last_updated).toLocaleString() %>
+        </p>
+      <% } %>
+    <% } %>
+  </div>
+
+  <!-- ============================================================
+       Generic Alternatives
+       ============================================================ -->
+  <div class="compare-section">
+    <div class="compare-heading">
+      <h2>Generic Alternatives</h2>
+      <p>
+        Cheaper generic or substitute options for <strong><%= medicine.name %></strong>,
+        with their availability and price across pharmacies.
+      </p>
+    </div>
+
+<% if (!genericAlternatives || genericAlternatives.length === 0) { %>
+      <div class="empty-state">
+        <span class="state-icon" aria-hidden="true">&#128712;</span>
+        <h3>No generic alternatives</h3>
+        <p>No generic alternatives are currently available for this medicine.</p>
+        <p class="hint">Please consult a pharmacist for potential substitutes.</p>
+      </div>
+    <% } else { %>
+      <% genericAlternatives.forEach(function(alt) {
+           const altInv = (alternativeInventory || []).find(a => a.medicine_id === alt.id) || { inventory: [] };
+           const altAvailable = altInv.inventory.filter(i => i.availability === true && i.stock_quantity > 0);
+           const altCheapest = altAvailable.length > 0
+             ? altAvailable.reduce((min, cur) => Number(cur.selling_price) < Number(min.selling_price) ? cur : min)
+             : null;
+           const cheaperThanOriginal = cheapest && altCheapest &&
+             Number(altCheapest.selling_price) < Number(cheapest.selling_price);
+      %>
+        <div class="alt-card">
+          <div class="alt-head">
+            <div>
+              <h3 class="alt-title"><%= alt.name %></h3>
+              <p class="table-sub">
+                <%= alt.generic_name || 'Generic' %>
+                <%= alt.strength ? ' · ' + alt.strength : '' %>
+                <%= alt.dosage_form ? ' · ' + alt.dosage_form : '' %>
+              </p>
+              <% if (alt.notes) { %>
+                <p class="hint"><%= alt.notes %></p>
+              <% } %>
+            </div>
+            <div class="alt-badges">
+              <% if (altInv.inventory.length === 0) { %>
+                <span class="badge badge-danger">No inventory</span>
+              <% } else if (!altCheapest) { %>
+                <span class="badge badge-danger">Out of stock</span>
+              <% } else { %>
+                <span class="badge badge-success">From ₹<%= Number(altCheapest.selling_price).toFixed(2) %></span>
+                <% if (cheaperThanOriginal) { %>
+                  <span class="badge badge-cheapest">Cheaper than <%= medicine.name %></span>
+                <% } %>
+              <% } %>
+            </div>
+          </div>
+
+          <% if (altInv.inventory.length === 0) { %>
+            <p class="hint">This alternative has no pharmacy inventory yet.</p>
+          <% } else { %>
+            <div class="table-responsive">
+              <table class="table compare-table">
+                <thead>
+                  <tr>
+                    <th>Pharmacy</th>
+                    <th>Location</th>
+                    <th>Availability</th>
+                    <th>Stock</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% altInv.inventory.forEach(function(item) {
+                    const isAvailable = item.availability === true && item.stock_quantity > 0;
+                    const isCheapest = altCheapest && item.pharmacy_id === altCheapest.pharmacy_id;
+                  %>
+                    <tr class="<%= isCheapest ? 'row-cheapest' : '' %> <%= isAvailable ? '' : 'row-ostock' %>">
+                      <td><span class="pharmacy-name"><%= item.pharmacy_name %></span></td>
+                      <td>
+                        <span class="table-sub">
+                          <%= item.pharmacy_city || '—' %><%= item.pharmacy_state ? ', ' + item.pharmacy_state : '' %>
+                        </span>
+                      </td>
+<td>
+                        <% if (isAvailable) { %>
+                          <span class="status-badge status-available" role="status">
+                            <span class="status-icon" aria-hidden="true"></span>Available
+                          </span>
+                        <% } else { %>
+                          <span class="status-badge status-out" role="status">
+                            <span class="status-icon" aria-hidden="true"></span>Out of Stock
+                          </span>
+                        <% } %>
+                      </td>
+                      <td>
+                        <% if (isAvailable) { %>
+                          <%= item.stock_quantity %> units
+                        <% } else { %>
+                          <span class="muted">—</span>
+                        <% } %>
+                      </td>
+                      <td>
+                        <% if (isAvailable) { %>
+                          <span class="price">₹<%= Number(item.selling_price).toFixed(2) %></span>
+                        <% } else { %>
+                          <span class="price muted">—</span>
+                        <% } %>
+                      </td>
+                      <td>
+                        <% if (isCheapest) { %>
+                          <span class="status-badge status-cheapest" role="status">
+                            <span class="status-icon" aria-hidden="true"></span>Cheapest
+                          </span>
+                        <% } else { %>
+                          <span class="muted">—</span>
+                        <% } %>
+                      </td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          <% } %>
+        </div>
+      <% }); %>
+    <% } %>
+  </div>
+</section>
+
+<%- include('../partials/footer', { year: new Date().getFullYear(), appName: appName }) %>
