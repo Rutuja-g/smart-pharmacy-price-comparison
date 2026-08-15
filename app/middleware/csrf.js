@@ -64,11 +64,12 @@ function csrfProtection(req, res, next) {
     return next();
   }
 
-  // For AJAX/JSON requests, the token may be sent in a header.
+  // Check body, query parameter (for multipart uploads), or headers (for AJAX).
   const submitted =
-    req.body && req.body._csrf
-      ? req.body._csrf
-      : req.get("x-csrf-token") || req.get("x-xsrf-token");
+    (req.body && req.body._csrf) ||
+    (req.query && req.query._csrf) ||
+    req.get("x-csrf-token") ||
+    req.get("x-xsrf-token");
 
   if (!submitted || !safeEqual(submitted, req.session.csrfToken)) {
     const err = new Error(

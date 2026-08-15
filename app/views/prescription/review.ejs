@@ -1,0 +1,69 @@
+<%- include('../partials/header', { title: title, appName: appName }) %>
+
+<section class="page-container">
+  <div class="content-card">
+    <div class="card-header">
+      <h1>Review Detected Medicines</h1>
+      <p class="text-sub font-normal">
+        Verify and select the exact medicines from the database matches below before comparing prices across pharmacies.
+      </p>
+    </div>
+
+    <%- include('../partials/flash') %>
+
+    <form action="/prescription/confirm" method="POST" class="review-form">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+      <% if (candidateMatches && candidateMatches.length > 0) { %>
+        <div class="candidate-list">
+          <% candidateMatches.forEach((item, index) => { %>
+            <div class="candidate-card mb-4 p-4 border rounded">
+              <div class="candidate-header mb-2">
+                <span class="badge badge-info">OCR Detected Term</span>
+                <strong class="ml-2"><%= item.candidate || '(No text extracted)' %></strong>
+              </div>
+
+              <div class="form-group">
+                <label for="medicine_select_<%= index %>">
+                  Select Matching Database Medicine:
+                </label>
+
+                <% if (item.matches && item.matches.length > 0) { %>
+                  <select
+                    id="medicine_select_<%= index %>"
+                    name="medicine_ids"
+                    class="form-control"
+                  >
+                    <option value="">-- Do not include / Skip item --</option>
+                    <% item.matches.forEach(med => { %>
+                      <option value="<%= med.id %>">
+                        <%= med.name %> <%= med.strength ? '(' + med.strength + ')' : '' %> <%= med.dosage_form ? '- ' + med.dosage_form : '' %> [Category: <%= med.category_name || 'N/A' %>]
+                      </option>
+                    <% }) %>
+                  </select>
+                <% } else { %>
+                  <p class="text-error text-sm mt-1">
+                    No direct database matches found for "<%= item.candidate %>".
+                  </p>
+                <% } %>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <p class="text-muted mb-4">No text candidates could be extracted from the uploaded prescription.</p>
+      <% } %>
+
+      <div class="form-actions mt-4">
+        <button type="submit" class="btn btn-primary">
+          Confirm Selected Medicines & Compare Prices
+        </button>
+        <a href="/prescription/upload" class="btn btn-secondary ml-2">
+          Upload Different Image
+        </a>
+      </div>
+    </form>
+  </div>
+</section>
+
+<%- include('../partials/footer', { year: new Date().getFullYear(), appName: appName }) %>

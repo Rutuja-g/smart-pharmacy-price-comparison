@@ -1,0 +1,44 @@
+<%- include('../partials/header', { title: title, appName: appName }) %>
+
+<section class="page-container">
+  <div class="form-card max-w-lg">
+    <div class="form-header">
+      <h1>Upload Prescription</h1>
+      <p class="text-sub font-normal">
+        Upload an image of your prescription to extract medicines and compare prices across local pharmacies.
+      </p>
+    </div>
+
+    <%- include('../partials/flash') %>
+
+    <form
+      action="/prescription/process?_csrf=<%= csrfToken %>"
+      method="POST"
+      enctype="multipart/form-data"
+      class="upload-form"
+    >
+      <div class="form-group">
+        <label for="prescriptionImage">Select Prescription Image</label>
+        <input
+          type="file"
+          id="prescriptionImage"
+          name="prescriptionImage"
+          accept="image/jpeg,image/png,image/webp"
+          required
+          class="file-input"
+        />
+        <small class="form-help">
+          Accepted formats: JPEG, PNG, or WebP (Max 5 MB).
+        </small>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary btn-block">
+          Upload & Scan Prescription
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<%- include('../partials/footer', { year: new Date().getFullYear(), appName: appName }) %>

@@ -30,3 +30,5 @@ TODO-Phase*.md
 test-results/
 playwright-report/
 blob-report/
+# Tesseract OCR language data
+eng.traineddata

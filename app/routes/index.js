@@ -14,6 +14,7 @@ const categoryRoutes = require("./category");
 const wishlistRoutes = require("./wishlist");
 const pharmacyDashboardRoutes = require("./pharmacyDashboard");
 const adminDashboardRoutes = require("./admin");
+const prescriptionRoutes = require("./prescription");
 
 const router = express.Router();
 
@@ -39,5 +40,8 @@ router.use("/", wishlistRoutes);
 
 // Pharmacy dashboard routes (protected - pharmacy_owner)
 router.use("/", pharmacyDashboardRoutes);
+
+// Prescription upload & price comparison routes
+router.use("/prescription", prescriptionRoutes);
 
 module.exports = router;

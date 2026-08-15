@@ -24,7 +24,9 @@
     "ejs": "^3.1.10",
     "express": "^4.19.2",
     "express-session": "^1.18.0",
-    "mysql2": "^3.10.0"
+    "multer": "^2.2.0",
+    "mysql2": "^3.10.0",
+    "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
