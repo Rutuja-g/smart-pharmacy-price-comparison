@@ -23,8 +23,13 @@ const User = require("../models/User");
  * @param {Object} res
  */
 function expireInactiveSession(req, res) {
-  req.session.destroy(() => {
-    res.clearCookie("connect.sid");
+  if (!req.session) {
+    return res.redirect("/login");
+  }
+  req.session.regenerate((err) => {
+    if (err) {
+      console.error("Session expire regenerate error:", err);
+    }
     req.flash(
       "error",
       "Your account has been deactivated. Please contact support.",
