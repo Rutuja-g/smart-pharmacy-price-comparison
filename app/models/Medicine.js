@@ -11,6 +11,7 @@
  */
 
 const { pool } = require("../config/db");
+const { escapeLike } = require("../utils/validation");
 
 // Base SELECT that joins categories so medicine rows include category name.
 const MEDICINE_SELECT = `
@@ -207,17 +208,6 @@ async function countByCategory() {
      GROUP BY category_id`,
   );
   return rows;
-}
-
-/**
- * Escape LIKE wildcards so user input cannot inject `%`, `_`, or `\`
- * into a LIKE pattern. This keeps the search term literal while still
- * wrapping it in surrounding `%...%` for a partial (substring) match.
- * @param {string} value
- * @returns {string}
- */
-function escapeLike(value) {
-  return String(value || "").replace(/[\\%_]/g, (ch) => `\\${ch}`);
 }
 
 /**

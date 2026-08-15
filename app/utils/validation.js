@@ -234,6 +234,17 @@ function parsePositiveNumber(raw) {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
+/**
+ * Escape LIKE wildcards so user input cannot inject `%`, `_`, or `\`
+ * into a LIKE pattern. This keeps the search term literal while still
+ * wrapping it in surrounding `%...%` for a partial (substring) match.
+ * @param {string} value
+ * @returns {string}
+ */
+function escapeLike(value) {
+  return String(value || "").replace(/[\\%_]/g, (ch) => `\\${ch}`);
+}
+
 module.exports = {
   parsePositiveInt,
   parseNonNegativeInt,
@@ -255,4 +266,5 @@ module.exports = {
   isValidShortText,
   isValidPhone,
   isValidPharmacyStatus,
+  escapeLike,
 };

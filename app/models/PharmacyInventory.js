@@ -20,6 +20,7 @@
  */
 
 const { pool } = require("../config/db");
+const { escapeLike } = require("../utils/validation");
 
 /**
  * Serialize a DECIMAL selling_price (returned as a string by mysql2) into a
@@ -222,17 +223,6 @@ async function getGenericAlternativeInventory(medicineId) {
   }
 
   return Array.from(grouped.values());
-}
-
-/**
- * Escape LIKE wildcards so user input cannot inject `%`, `_`, or `\`
- * into a LIKE pattern. This keeps the search term literal while still
- * wrapping it in surrounding `%...%` for a partial (substring) match.
- * @param {string} value
- * @returns {string}
- */
-function escapeLike(value) {
-  return String(value || "").replace(/[\\%_]/g, (ch) => `\\${ch}`);
 }
 
 /**
