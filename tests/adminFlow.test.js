@@ -168,6 +168,10 @@ async function snapshotSeededCategories() {
   return rows;
 }
 
+async function cleanupCreatedPharmacies() {
+  await pool.query("DELETE FROM pharmacies WHERE name LIKE 'Playwright Created Pharmacy%'");
+}
+
 async function cleanupTestCategories() {
   await pool.query("DELETE FROM categories WHERE name LIKE 'Playwright Test Category%'");
 }
@@ -500,6 +504,85 @@ test('Admin can create, edit, and manage dedicated test category through the UI'
   } finally {
     try {
       await cleanupTestCategories();
+    } finally {
+      const logoutButton = page.locator('#main-nav form[action="/logout"] button[type="submit"]');
+      if (await logoutButton.count()) {
+        await Promise.all([page.waitForURL(/\/login$/), logoutButton.click()]);
+      }
+    }
+  }
+});
+
+test('Admin can create a new pharmacy through the UI with validation and verify in management list', async ({ page }) => {
+  const uniqueId = Date.now();
+  const newPharmacyName = `Playwright Created Pharmacy ${uniqueId}`;
+  let seededPharmaciesBefore;
+
+  try {
+    await cleanupCreatedPharmacies();
+    seededPharmaciesBefore = await snapshotSeededPharmacies();
+
+    await loginAsTestAdmin(page);
+    await page.goto('/admin/pharmacies');
+    await expect(page.locator('h1')).toHaveText('Manage Pharmacies');
+
+    // 1. Open the "Add Pharmacy" form through the UI
+    await page.locator('a[href="/admin/pharmacies/add"]').click();
+    await expect(page.locator('h1')).toHaveText('Add Pharmacy');
+
+    const addForm = page.locator('form.auth-form');
+    await expect(addForm.locator('#name')).toBeVisible();
+    await expect(addForm.locator('#address')).toBeVisible();
+    await expect(addForm.locator('#city')).toBeVisible();
+    await expect(addForm.locator('#state')).toBeVisible();
+    await expect(addForm.locator('#phone')).toBeVisible();
+    await expect(addForm.locator('#status')).toBeVisible();
+    await expect(addForm.locator('#owner_user_id')).toBeVisible();
+
+    // 2. Focused required-field validation assertion
+    await addForm.locator('#city').fill('Test City');
+    await addForm.locator('button[type="submit"]').click();
+    await expect(page.locator('.field-error')).toContainText(
+      'Pharmacy name is required (2-150 characters).'
+    );
+
+    // 3. Fill and submit valid pharmacy details
+    await addForm.locator('#name').fill(newPharmacyName);
+    await addForm.locator('#address').fill('123 Innovation Way');
+    await addForm.locator('#city').fill('Springfield');
+    await addForm.locator('#state').fill('IL');
+    await addForm.locator('#phone').fill('+1-555-0999');
+    await addForm.locator('#status').selectOption('pending');
+    const ownerOptions = await addForm.locator('#owner_user_id option').all();
+    if (ownerOptions.length > 1) {
+      await addForm.locator('#owner_user_id').selectOption({ index: 1 });
+    }
+
+    await Promise.all([
+      page.waitForURL(/\/admin\/pharmacies$/),
+      addForm.locator('button[type="submit"]').click(),
+    ]);
+
+    // 4. Verify success flash message
+    await expect(page.locator('.alert-success')).toContainText(
+      `Pharmacy "${newPharmacyName}" was added.`
+    );
+
+    // 5. Verify the new pharmacy appears in the table with correct details
+    const pharmacyRow = page.locator('table tbody tr').filter({
+      hasText: newPharmacyName,
+    });
+    await expect(pharmacyRow).toHaveCount(1);
+    await expect(pharmacyRow.locator('.table-sub')).toHaveText('+1-555-0999');
+    await expect(pharmacyRow.locator('td').nth(1)).toHaveText('Springfield, IL');
+    await expect(pharmacyRow.locator('.badge-warning')).toHaveText('Pending');
+
+    // 6. Verify seeded pharmacies were unchanged
+    const seededPharmaciesAfter = await snapshotSeededPharmacies();
+    expect(seededPharmaciesAfter).toEqual(seededPharmaciesBefore);
+  } finally {
+    try {
+      await cleanupCreatedPharmacies();
     } finally {
       const logoutButton = page.locator('#main-nav form[action="/logout"] button[type="submit"]');
       if (await logoutButton.count()) {

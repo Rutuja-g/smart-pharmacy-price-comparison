@@ -97,3 +97,59 @@ test('Deactivated account session expires and shows deactivation message', async
     await pool.query("UPDATE users SET status = 'active' WHERE email = ?", [testEmail]);
   }
 });
+
+test('User registration flow - invalid input validation, successful registration, and re-authentication', async ({ page }) => {
+  const uniqueId = Date.now();
+  const regEmail = `reg-test-${uniqueId}@playwright.local`;
+  const regName = `RegUser ${uniqueId}`;
+  const testPassword = process.env.PLAYWRIGHT_TEST_PASSWORD_USER;
+
+  if (!testPassword) {
+    throw new Error('PLAYWRIGHT_TEST_PASSWORD_USER environment variable is not set');
+  }
+
+  try {
+    // 1. Open the real /register page and verify form rendering
+    await page.goto('/register');
+    await expect(page.locator('h1')).toHaveText('Create your account');
+    await expect(page.locator('#name')).toBeVisible();
+    await expect(page.locator('#email')).toBeVisible();
+    await expect(page.locator('#password')).toBeVisible();
+    await expect(page.locator('#passwordConfirm')).toBeVisible();
+    await expect(page.locator('button[type="submit"]')).toHaveText('Create Account');
+
+    // 2. Focused invalid-registration assertion (mismatched passwords)
+    await page.fill('#name', regName);
+    await page.fill('#email', regEmail);
+    await page.fill('#password', testPassword);
+    await page.fill('#passwordConfirm', 'MismatchedPass123!');
+    await page.click('button[type="submit"]');
+
+    await expect(page).toHaveURL(/\/register$/);
+    await expect(page.locator('.field-error')).toContainText('Passwords do not match.');
+
+    // 3. Register the uniquely identified test user through the real UI
+    await page.fill('#password', testPassword);
+    await page.fill('#passwordConfirm', testPassword);
+    await page.click('button[type="submit"]');
+
+    // 4. Verify successful registration behavior (redirect to /profile + success flash)
+    await expect(page).toHaveURL(/\/profile$/);
+    await expect(page.locator('.alert-success')).toContainText('Account created successfully. Welcome!');
+    await expect(page.locator('h1')).toHaveText(regName);
+
+    // 5. Verify the new user can authenticate if registration logs them out
+    await page.click('#main-nav form[action="/logout"] button');
+    await expect(page).toHaveURL(/\/login$/);
+
+    await page.fill('#email', regEmail);
+    await page.fill('#password', testPassword);
+    await page.click('button[type="submit"]');
+
+    await expect(page).toHaveURL(/\/profile$/);
+    await expect(page.locator('.alert-success')).toContainText(`Welcome back, ${regName}!`);
+  } finally {
+    // 6. Clean up ONLY the uniquely created registration test user
+    await pool.query('DELETE FROM users WHERE email = ?', [regEmail]);
+  }
+});

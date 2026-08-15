@@ -214,3 +214,51 @@ test('Pharmacy owner can add, update, and re-add inventory through the UI', asyn
     }
   }
 });
+
+test('Pharmacy owner can toggle inventory availability and restore original state through the UI', async ({ page }) => {
+  try {
+    await loginAsTestOwner(page);
+
+    await page.goto('/pharmacy/inventory');
+    await expect(page.locator('h1')).toHaveText('Pharmacy Inventory');
+
+    const row = page.locator('table tbody tr').first();
+    await expect(row).toHaveCount(1);
+
+    const initialBadgeText = (await row.locator('.badge').textContent()).trim();
+    const isInitiallyAvailable = initialBadgeText === 'Available';
+
+    const toggleButtonText = isInitiallyAvailable ? 'Mark Out' : 'Mark Available';
+    const expectedToggledBadgeText = isInitiallyAvailable ? 'Out of Stock' : 'Available';
+    const restoreButtonText = isInitiallyAvailable ? 'Mark Available' : 'Mark Out';
+
+    // 1. Toggle availability via the UI button
+    const toggleButton = row.locator('form[action$="/availability"] button').filter({ hasText: toggleButtonText });
+    await Promise.all([
+      page.waitForNavigation(),
+      toggleButton.click(),
+    ]);
+
+    // 2. Verify UI reflects the changed availability state
+    await expect(page.locator('.alert-success')).toBeVisible();
+    const updatedRow = page.locator('table tbody tr').first();
+    await expect(updatedRow.locator('.badge')).toHaveText(expectedToggledBadgeText);
+
+    // 3. Toggle back to original state
+    const restoreButton = updatedRow.locator('form[action$="/availability"] button').filter({ hasText: restoreButtonText });
+    await Promise.all([
+      page.waitForNavigation(),
+      restoreButton.click(),
+    ]);
+
+    // 4. Verify original state is restored
+    await expect(page.locator('.alert-success')).toBeVisible();
+    const restoredRow = page.locator('table tbody tr').first();
+    await expect(restoredRow.locator('.badge')).toHaveText(initialBadgeText);
+  } finally {
+    const logoutButton = page.locator('#main-nav form[action="/logout"] button[type="submit"]');
+    if (await logoutButton.count()) {
+      await Promise.all([page.waitForURL(/\/login$/), logoutButton.click()]);
+    }
+  }
+});
