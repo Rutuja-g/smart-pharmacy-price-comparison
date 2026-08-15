@@ -5,7 +5,8 @@
   "main": "app/server.js",
   "scripts": {
     "start": "node app/server.js",
-    "dev": "nodemon app/server.js"
+    "dev": "nodemon app/server.js",
+    "test": "playwright test"
   },
   "keywords": [
     "pharmacy",
@@ -26,6 +27,7 @@
     "mysql2": "^3.10.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "nodemon": "^3.1.4"
   }
 }
